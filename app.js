@@ -28,6 +28,9 @@ dotenv.config({ path: '.env' });
 const userController = require('./controllers/user');
 const contactController = require('./controllers/contact');
 const homeController = require('./controllers/home');
+const stationController = require('./controllers/station');
+const trainController = require('./controllers/train');
+const ticketController = require('./controllers/ticket');
 
 /**
  * API keys and Passport configuration.
@@ -46,7 +49,9 @@ console.log('Run this app using "npm start" to include sass/scss/css builds.');
 mongoose.connect(process.env.MONGODB_URI);
 mongoose.connection.on('error', (err) => {
   console.error(err);
-  console.log('%s MongoDB connection error. Please make sure MongoDB is running.');
+  console.log(
+    '%s MongoDB connection error. Please make sure MongoDB is running.'
+  );
   process.exit();
 });
 
@@ -61,19 +66,21 @@ app.use(compression());
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(session({
-  resave: true,
-  saveUninitialized: true,
-  secret: process.env.SESSION_SECRET,
-  cookie: { maxAge: 1209600000 }, // Two weeks in milliseconds
-  store: MongoStore.create({ mongoUrl: process.env.MONGODB_URI })
-}));
+app.use(
+  session({
+    resave: true,
+    saveUninitialized: true,
+    secret: process.env.SESSION_SECRET,
+    cookie: { maxAge: 1209600000 }, // Two weeks in milliseconds
+    store: MongoStore.create({ mongoUrl: process.env.MONGODB_URI }),
+  })
+);
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
-app.use((req, res, next) => {
-  lusca.csrf()(req, res, next);
-});
+// app.use((req, res, next) => {
+//   lusca.csrf()(req, res, next);
+// });
 app.use(lusca.xframe('SAMEORIGIN'));
 app.use(lusca.xssProtection(true));
 app.disable('x-powered-by');
@@ -83,24 +90,54 @@ app.use((req, res, next) => {
 });
 app.use((req, res, next) => {
   // After successful login, redirect back to the intended page
-  if (!req.user
-    && req.path !== '/login'
-    && req.path !== '/signup'
-    && !req.path.match(/^\/auth/)
-    && !req.path.match(/\./)) {
+  if (
+    !req.user &&
+    req.path !== '/login' &&
+    req.path !== '/signup' &&
+    !req.path.match(/^\/auth/) &&
+    !req.path.match(/\./)
+  ) {
     req.session.returnTo = req.originalUrl;
-  } else if (req.user
-    && (req.path === '/account')) {
+  } else if (req.user && req.path === '/account') {
     req.session.returnTo = req.originalUrl;
   }
   next();
 });
-app.use('/', express.static(path.join(__dirname, 'public'), { maxAge: 31557600000 }));
-app.use('/js/lib', express.static(path.join(__dirname, 'node_modules/chart.js/dist'), { maxAge: 31557600000 }));
-app.use('/js/lib', express.static(path.join(__dirname, 'node_modules/popper.js/dist/umd'), { maxAge: 31557600000 }));
-app.use('/js/lib', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/js'), { maxAge: 31557600000 }));
-app.use('/js/lib', express.static(path.join(__dirname, 'node_modules/jquery/dist'), { maxAge: 31557600000 }));
-app.use('/webfonts', express.static(path.join(__dirname, 'node_modules/@fortawesome/fontawesome-free/webfonts'), { maxAge: 31557600000 }));
+app.use(
+  '/',
+  express.static(path.join(__dirname, 'public'), { maxAge: 31557600000 })
+);
+app.use(
+  '/js/lib',
+  express.static(path.join(__dirname, 'node_modules/chart.js/dist'), {
+    maxAge: 31557600000,
+  })
+);
+app.use(
+  '/js/lib',
+  express.static(path.join(__dirname, 'node_modules/popper.js/dist/umd'), {
+    maxAge: 31557600000,
+  })
+);
+app.use(
+  '/js/lib',
+  express.static(path.join(__dirname, 'node_modules/bootstrap/dist/js'), {
+    maxAge: 31557600000,
+  })
+);
+app.use(
+  '/js/lib',
+  express.static(path.join(__dirname, 'node_modules/jquery/dist'), {
+    maxAge: 31557600000,
+  })
+);
+app.use(
+  '/webfonts',
+  express.static(
+    path.join(__dirname, 'node_modules/@fortawesome/fontawesome-free/webfonts'),
+    { maxAge: 31557600000 }
+  )
+);
 
 /**
  * Home routes.
@@ -121,18 +158,105 @@ app.post('/signup', userController.postSignup);
 /**
  * Contact routes.
  */
-app.get('/contact', passportConfig.isAuthenticated, contactController.getContact);
-app.post('/contact', passportConfig.isAuthenticated, contactController.postContact);
+app.get(
+  '/contact',
+  passportConfig.isAuthenticated,
+  contactController.getContact
+);
+app.post(
+  '/contact',
+  passportConfig.isAuthenticated,
+  contactController.postContact
+);
 /**
  * account routes.
  */
-app.get('/account/verify', passportConfig.isAuthenticated, userController.getVerifyEmail);
-app.get('/account/verify/:token', passportConfig.isAuthenticated, userController.getVerifyEmailToken);
+app.get(
+  '/account/verify',
+  passportConfig.isAuthenticated,
+  userController.getVerifyEmail
+);
+app.get(
+  '/account/verify/:token',
+  passportConfig.isAuthenticated,
+  userController.getVerifyEmailToken
+);
 app.get('/account', passportConfig.isAuthenticated, userController.getAccount);
-app.post('/account/profile', passportConfig.isAuthenticated, userController.postUpdateProfile);
-app.post('/account/password', passportConfig.isAuthenticated, userController.postUpdatePassword);
-app.post('/account/delete', passportConfig.isAuthenticated, userController.postDeleteAccount);
-
+app.post(
+  '/account/profile',
+  passportConfig.isAuthenticated,
+  userController.postUpdateProfile
+);
+app.post(
+  '/account/password',
+  passportConfig.isAuthenticated,
+  userController.postUpdatePassword
+);
+app.post(
+  '/account/delete',
+  passportConfig.isAuthenticated,
+  userController.postDeleteAccount
+);
+/**
+ * station routes.
+ */
+app.get(
+  '/stations/create',
+  passportConfig.isAuthenticated,
+  stationController.getCreateStation
+);
+app.post(
+  '/stations/create',
+  passportConfig.isAuthenticated,
+  stationController.postCreateStation
+);
+app.get(
+  '/stations',
+  passportConfig.isAuthenticated,
+  stationController.getAllStations
+);
+app.get(
+  '/api/stations',
+  passportConfig.isAuthenticated,
+  stationController.getAllStationsApi
+);
+/**
+ * train routes.
+ */
+app.get(
+  '/trains/create',
+  passportConfig.isAuthenticated,
+  trainController.getCreateTrain
+);
+app.post(
+  '/trains/create',
+  passportConfig.isAuthenticated,
+  trainController.postCreateTrain
+);
+app.post(
+  '/search',
+  passportConfig.isAuthenticated,
+  trainController.searchTrains
+);
+app.get('/trains', passportConfig.isAuthenticated, trainController.getTrains);
+/**
+ * ticket routes.
+ */
+app.post(
+  '/buy/:train/:source/:destination/:route',
+  passportConfig.isAuthenticated,
+  ticketController.postBookTicket
+);
+app.get(
+  '/tickets',
+  passportConfig.isAuthenticated,
+  ticketController.getTickets
+);
+app.post(
+  '/cancel/:id',
+  passportConfig.isAuthenticated,
+  ticketController.cancelTicket
+);
 /**
  * Error Handler.
  */
@@ -150,7 +274,11 @@ if (process.env.NODE_ENV === 'development') {
  * Start Express server.
  */
 app.listen(app.get('port'), () => {
-  console.log(`App is running on http://localhost:${app.get('port')} in ${app.get('env')} mode`);
+  console.log(
+    `App is running on http://localhost:${app.get('port')} in ${app.get(
+      'env'
+    )} mode`
+  );
   console.log('Press CTRL-C to stop');
 });
 
