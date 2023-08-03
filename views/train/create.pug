@@ -1,0 +1,177 @@
+doctype html
+html
+  head
+    title Train Creation Form
+    style.
+      h1 {
+        text-align: center;
+      }
+
+      form {
+        max-width: 600px;
+        margin: 0 auto;
+      }
+
+      label {
+        display: block;
+        font-weight: bold;
+        margin-top: 10px;
+      }
+
+      input[type="text"],
+      input[type="number"],
+      select {
+        width: 100%;
+        padding: 8px;
+        margin: 5px 0;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+      }
+
+      input[type="datetime-local"] {
+        width: 100%;
+        padding: 8px;
+        margin: 5px 0;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+      }
+
+      h4 {
+        margin-top: 20px;
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 5px;
+      }
+
+      button[type="submit"] {
+        background-color: #4CAF50;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-top: 20px;
+      }
+
+      button[type="submit"]:hover {
+        background-color: #45a049;
+      }
+  body
+    h1 Train Creation Form
+    form(action="/trains/create", method="post")
+      label(for="name") Train Name:
+      input(type="text", name="name", required)
+      br
+
+      label(for="number") Train Number:
+      input(type="text", name="number", required)
+      br
+
+      label(for="seats") Total Seats:
+      input(type="number", name="seats", required)
+      br
+
+      h3 Routes:
+      each i in [0, 1, 2]
+        div
+          h4 Route #{i + 1}
+          label(for=`source-${i}`) Source Station:
+          select(name=`source-${i}`, required )
+            each station in []
+              option(value=station._id) #{station.name}
+          br
+
+          label(for=`time-${i}`) Departure Time:
+          input(type="datetime-local", name=`time-${i}`, required)
+          br
+
+          p.selected Stops:
+          select(name=`selected-stops-${i}`, multiple )
+            each stop in []
+              option(value=stop._id) #{stop.name}
+          label(for=`stops-${i}`) Intermediate Stops:
+          select(name=`stops-${i}`, multiple )
+            each station in []
+              option(value=station._id) #{station.name}
+          br
+      each routeStops, routeIndex in selectedStops? selectedStops : []
+        each stopData, stopIndex in routeStops
+          input(type="hidden", name=`stops-${routeIndex}-${stopIndex}`, value=stopData.stop)
+
+      button(type="submit") Create Train
+
+    script.
+      const sourceDropdown = document.querySelectorAll('[name^="source-"]');
+      const stopsDropdown = document.querySelectorAll('[name^="stops-"]');
+      const selectedStops = [];
+      fetch('/api/stations')
+        .then((response) => response.json())
+        .then((stations) => {
+          stopsDropdown.forEach((dropdown) => {
+            dropdown.addEventListener('change', handleStopSelection);
+            stations.forEach((station, index) => {
+              const option = document.createElement('option');
+              option.value = station._id;
+              option.name = index;
+              option.textContent = station.name;
+              dropdown.appendChild(option);
+            });
+          });
+          sourceDropdown.forEach((dropdown) => {
+            stations.forEach((station) => {
+              const option = document.createElement('option');
+              option.value = station._id;
+              option.textContent = station.name;
+              dropdown.appendChild(option);
+            });
+          });
+        })
+        .catch((error) => {
+          console.error('Failed to fetch stations:', error);
+        });
+      function handleStopSelection(event) {
+        const selectedOption = event.target.options[event.target.selectedIndex];
+        const selectedStop = selectedOption.value;
+        const optionIndex = selectedOption.dataset.index;
+        const dropdownName = event.target.name;
+        const routeName = dropdownName.split('-')[0]; // 'source' or 'stops'
+        const routeIndex = dropdownName.split('-')[1];
+        // If the route array for the current index does not exist, create it
+        if (!selectedStops[routeIndex]) {
+          selectedStops[routeIndex] = [];
+        }
+
+        const isStopSelected = selectedStops[routeIndex].some(
+          (stopObj) => stopObj.stop === selectedStop
+        );
+
+        // If the selected stop is not already selected, add it to the selectedStops array
+        if (!isStopSelected) {
+          // If the current route is 'source', add the selected stop to the beginning of the route
+          // If the current route is 'stops', add the selected stop to its corresponding route
+          if (routeName === 'source') {
+            selectedStops[routeIndex][0] = { stop: selectedStop, index: optionIndex };
+          } else if (routeName === 'stops') {
+            selectedStops[routeIndex].push({ stop: selectedStop, index: optionIndex });
+          }
+
+          // Display the selected stops on top of the stop select
+          const stopsDropdown = document.querySelector(`[name="stops-${routeIndex}"]`);
+          const selectedStopsDropdown = document.querySelector(`[name="selected-stops-${routeIndex}"]`);
+          const selectedStopsForRoute = selectedStops[routeIndex];
+          const unSelectedOptions = Array.from(stopsDropdown.options).filter((option) =>
+            !selectedStopsForRoute.some((stopObj) => stopObj.stop === option.value)
+          );
+          const selectedOptions = Array.from(stopsDropdown.options).filter((option) =>
+            selectedStopsForRoute.some((stopObj) => stopObj.stop === option.value)
+          );
+          // Remove all options from the dropdown and add the selected options on top
+          stopsDropdown.innerHTML = '';
+          unSelectedOptions.forEach((option) => stopsDropdown.appendChild(option));
+          Array.from(stopsDropdown.options).forEach((option) => stopsDropdown.appendChild(option));
+
+          selectedOptions.forEach((option) => selectedStopsDropdown.appendChild(option));
+          Array.from(selectedStopsDropdown.options).forEach((option) => selectedStopsDropdown.appendChild(option));
+        }
+      }

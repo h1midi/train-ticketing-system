@@ -1,0 +1,141 @@
+html
+  head
+    title Ticket List
+    style.
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        background-color: #f0f0f0;
+      }
+
+      h1 {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+
+      ul {
+        list-style-type: none;
+        padding: 0;
+      }
+
+      li {
+        background-color: #fff;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        padding: 20px;
+        box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+        height: auto;
+        width: 800px;
+      }
+
+      li:hover {
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+      }
+
+      .route-container {
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 10px;
+        margin-top: 20px;
+        background-color: #f5f5f5;
+      }
+
+      .route-info {
+        font-weight: bold;
+      }
+
+      .stack {
+        position: relative;
+        height: 60px;
+      }
+
+      .line {
+        display: flex;
+        border: 1px solid #272829;
+        border-radius: 5px;
+        padding: 0px;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        width: 98%;
+      }
+
+      .station {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+      }
+
+      .circle {
+        background-color: #272829;
+        border-radius: 50%;
+        width: 14px;
+        height: 14px;
+        margin: 0;
+      }
+
+      .source-circle {
+        background-color: #4CAF50;
+      }
+      .destination-circle {
+        background-color: #FFD700;
+      }
+      .end-circle {
+        background-color: #FF2E2E;
+      }
+      input {
+        background-color: #FF2E2E;
+        border: none;
+        color: white;
+        padding: 8px 16px;
+        text-decoration: none;
+        margin: 4px 2px;
+        cursor: pointer;
+        border-radius: 5px;
+      }
+      input:hover {
+        background-color: #FF4F4F;
+      }
+
+  body
+    h1 Ticket List
+    ul
+      each ticket, index in tickets
+        - const route = routes[index][0]
+        li
+          div(style='display: flex; justify-content: space-between; align-items: center;')
+            strong Ticket ID: #{ticket._id}
+            form(action=`/cancel/${ticket._id}`, method="post")
+                  input(type="submit", style='', value='Cancel')
+          div(style='display: flex; justify-content: space-between; align-items: center;')
+            div
+              p Train: #{ticket.train.name}
+              p(style='background-color: #4CAF50; padding:8px; border-radius:10px') Source Station: #{ticket.source.name}
+            div
+              p Payment Status: #{ticket.payment_status}
+              p(style='background-color: #FFD700; padding:8px; border-radius:10px') Destination Station: #{ticket.destination.name}
+          b Route
+          div(style='border: 1px solid #ccc; border-radius: 5px; padding: 10px; margin: 20px;')
+            p <b>Departure Time:</b> #{route.time.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric'})}
+            div.stack
+              div.line
+              div.station
+                p= route.source.name
+                each stop in route.stops
+                  p= stop.name
+              div.station(style="top: 50;")
+                div.circle.source-circle
+                each stop in route.stops.slice(0, -1)
+                  div.circle(class=stop._id.toString() === ticket.destination._id.toString() ? 'destination-circle' : '')
+                div.circle.end-circle
