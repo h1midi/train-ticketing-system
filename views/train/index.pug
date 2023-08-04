@@ -1,14 +1,16 @@
-html
+extends ../layout
+
+block content
   head
-    title Trains Data Page
+    title= title
     link(rel='stylesheet', href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css')
     style.
-      body {
+      body.trn {
         font-family: Arial, sans-serif;
         margin: 0 auto;
         padding: 20px;
       }
-      h1 {
+      h1.trn {
         text-align: center;
         margin-bottom: 20px;
       }
@@ -20,18 +22,18 @@ html
         height: auto;
         width: 400px;
       }
-      h2 {
+      h2.trn {
         margin-bottom: 10px;
       }
-      h3 {
+      h3.trn {
         margin-top: 20px;
         margin-bottom: 10px;
       }
-      ul {
+      ul.trn {
         margin: 0;
         padding: 0;
       }
-      li {
+      li.trn {
         list-style: none;
         margin-bottom: 5px;
       }
@@ -46,7 +48,7 @@ html
         border-radius: 5px;
         padding: 0px;
         position: absolute;
-        top: 56;
+        top: 56px;
         left: 0;
         right: 0;
         width: 98%;
@@ -76,7 +78,7 @@ html
         gap: 20px;
         justify-content: center;
       }
-      input[type="submit"] {
+      input.trn[type="submit"] {
         width: 160px;
         height: 40px;
         font-size: 16px;
@@ -90,25 +92,25 @@ html
         font-weight: bold;
         margin-left: 100px;
       }
-      input[type="submit"]:hover {
+      input.trn[type="submit"]:hover {
         background-color: #D8D9DA;
         color: #272829;
         border: 2px solid #272829;
       }
-  body
-    h1 Available Trains
+  body.trn
+    h1.trn Available Trains
     div.trains-container
       each train in trains
         div.train-container
-          h2= train.name
+          h2.trn= train.name
           div(style='display: flex; justify-content: space-around; align-items: center;')
             p <b>Train Number:</b> #{train.number}
             p <b>Total Seats:</b> #{train.seats}
-          h3 Routes:
-          ul
+          h3.trn Routes:
+          ul.trn
             each route in train.routes
               div(style='border: 1px solid #ccc; border-radius: 5px; padding: 10px; margin-bottom: 10px;')
-                li
+                li.trn
                   p <b>Departure Time:</b> #{route.time.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                   div.stack
                     div.line
@@ -116,11 +118,11 @@ html
                       p= route.source.name
                       each stop in route.stops
                         p= stop.name
-                    div.station(style="top: 50;")
+                    div.station(style="top: 50px;")
                       div.circle(style="background-color: #4CAF50;")
                       each stop in route.stops.slice(0, -1)
                         div.circle
                       div.circle(style="background-color: #FF2E2E;")
                 form(action=`/buy/${train._id}/${route.source._id}/${destinationId?destinationId:route.source._id}/${route._id}`, method="post")
-                  input(type="submit", style='', value="Book Ticket")
+                  input.trn(type="submit", style='', value="Book Ticket")
 

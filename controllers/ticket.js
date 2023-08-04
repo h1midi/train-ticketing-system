@@ -54,7 +54,7 @@ exports.getTickets = async (req, res) => {
     res.render('ticket/tickets', {
       routes: rts,
       tickets,
-      pageTitle: 'Tickets',
+      title: 'My Tickets',
     });
   } catch (err) {
     res.status(500).json({ msg: err.message });

@@ -1,8 +1,10 @@
-html
+extends ../layout
+
+block content
   head
-    title Ticket List
+    title= title
     style.
-      body {
+      body.tkt {
         display: flex;
         justify-content: center;
         align-items: center;
@@ -12,17 +14,17 @@ html
         background-color: #f0f0f0;
       }
 
-      h1 {
+      h1.tkt {
         text-align: center;
         margin-bottom: 30px;
       }
 
-      ul {
+      ul.tkt {
         list-style-type: none;
         padding: 0;
       }
 
-      li {
+      li.tkt {
         background-color: #fff;
         border: 1px solid #ccc;
         border-radius: 5px;
@@ -33,7 +35,7 @@ html
         width: 800px;
       }
 
-      li:hover {
+      li.tkt:hover {
         box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
       }
 
@@ -94,7 +96,7 @@ html
       .end-circle {
         background-color: #FF2E2E;
       }
-      input {
+      input.tkt {
         background-color: #FF2E2E;
         border: none;
         color: white;
@@ -104,20 +106,20 @@ html
         cursor: pointer;
         border-radius: 5px;
       }
-      input:hover {
+      input.tkt:hover {
         background-color: #FF4F4F;
       }
 
-  body
-    h1 Ticket List
-    ul
+  body.tkt
+    h1.tkt Ticket List
+    ul.tkt
       each ticket, index in tickets
         - const route = routes[index][0]
-        li
+        li.tkt
           div(style='display: flex; justify-content: space-between; align-items: center;')
             strong Ticket ID: #{ticket._id}
             form(action=`/cancel/${ticket._id}`, method="post")
-                  input(type="submit", style='', value='Cancel')
+                  input.tkt(type="submit", style='', value='Cancel')
           div(style='display: flex; justify-content: space-between; align-items: center;')
             div
               p Train: #{ticket.train.name}
@@ -134,7 +136,7 @@ html
                 p= route.source.name
                 each stop in route.stops
                   p= stop.name
-              div.station(style="top: 50;")
+              div.station(style="top: 50px;")
                 div.circle.source-circle
                 each stop in route.stops.slice(0, -1)
                   div.circle(class=stop._id.toString() === ticket.destination._id.toString() ? 'destination-circle' : '')

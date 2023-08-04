@@ -4,7 +4,7 @@ const Station = require('../models/Station');
 // create a new train
 exports.getCreateTrain = (req, res) => {
   res.render('train/create', {
-    pageTitle: 'Create Train',
+    title: 'Create Train',
   });
 };
 
@@ -120,7 +120,7 @@ exports.searchTrains = async (req, res) => {
     res.render('train/index', {
       trains,
       destinationId,
-      pageTitle: 'Trains',
+      title: 'Search',
     });
   } catch (err) {
     console.log('From catch block');
@@ -131,20 +131,20 @@ exports.searchTrains = async (req, res) => {
 };
 
 // get all trains
-// exports.getTrains = async (req, res) => {
-//   try {
-//     const trains = await Train.find()
-//       .populate('routes.source')
-//       .populate('routes.stops');
-//     res.render('train/index', {
-//       trains,
-//       pageTitle: 'Trains',
-//     });
-// res.status(200).json(trains);
-//   } catch (err) {
-//     res.status(500).json(err.message);
-//   }
-// };
+exports.getTrains = async (req, res) => {
+  try {
+    const trains = await Train.find()
+      .populate('routes.source')
+      .populate('routes.stops');
+    res.render('train/index', {
+      trains,
+      title: 'Available Trains',
+    });
+    res.status(200).json(trains);
+  } catch (err) {
+    res.status(500).json(err.message);
+  }
+};
 
 // get a train
 // exports.getTrain = async (req, res) => {
@@ -152,7 +152,7 @@ exports.searchTrains = async (req, res) => {
 //     const train = await Train.findById(req.params.id);
 //     res.render('train', {
 //       train,
-//       pageTitle: train.name,
+//       title: train.name,
 //       path: '/trains',
 //     });
 //   } catch (err) {
@@ -167,7 +167,7 @@ exports.searchTrains = async (req, res) => {
 //     const train = await Train.findById(req.params.id);
 //     res.render('update-train', {
 //       train,
-//       pageTitle: train.name,
+//       title: train.name,
 //       path: '/trains',
 //     });
 //   } catch (err) {

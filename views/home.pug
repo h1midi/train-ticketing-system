@@ -1,4 +1,4 @@
-//- extends layout
+extends layout
 
 block content
   head
@@ -6,7 +6,7 @@ block content
     title= title
     link(rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap")
     style.
-      body {
+      body.s {
         font-family: 'Poppins', sans-serif;
         display: flex;
         justify-content: center;
@@ -15,7 +15,7 @@ block content
         margin: 0;
       }
 
-      form {
+      form.s {
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -27,7 +27,7 @@ block content
         height: 300px; /* Set a specific height for the container */
       }
 
-      div > * {
+      div.s > * {
         margin-bottom: 16px;
       }
 
@@ -35,7 +35,7 @@ block content
         display: flex;
       }
 
-      input[type="text"] {
+      input.s[type="text"] {
         font-size: 16px;
         width: 400px;
         height: 50px;
@@ -45,11 +45,11 @@ block content
         border-radius: 5px;
       }
 
-      input[type="text"]:focus {
+      input.s[type="text"]:focus {
         outline: 2px solid #272829;
       }
 
-      input[type="submit"] {
+      input.s[type="submit"] {
         width: 160px;
         height: 50px;
         font-size: 20px;
@@ -63,7 +63,7 @@ block content
         font-weight: bold;
       }
 
-      input[type="submit"]:hover {
+      input.s[type="submit"]:hover {
         background-color: #D8D9DA;
         color: #272829;
         border: 2px solid #272829;
@@ -75,13 +75,14 @@ block content
         left: 50%;
         transform: translateX(-50%);
       }
-  div.form-container
-    img.logo(src="logo.jpg", alt="Logo", height="150px")
-    br
-    br
-    img(src="railway.png", alt="realway", width="600px")
-    form(action="/search", method="post")
-      .form-row
-        input(type="text", name="source")
-        input(type="text", name="destination")
-      input(type="submit", value="Search")
+  body.s
+    div.s.form-container
+      //- img.logo(src="logo.jpg", alt="Logo", height="150px")
+      br
+      br
+      img(src="railway.png", alt="realway", width="600px")
+      form.s(action="/search", method="post")
+        .form-row
+          input.s(type="text", name="source")
+          input.s(type="text", name="destination")
+        input.s(type="submit", value="Search")

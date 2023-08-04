@@ -1,4 +1,4 @@
-nav.navbar.navbar-expand-lg.navbar-dark.bg-dark
+nav.navbar.navbar-expand-lg.navbar-light.bg-light
   .container
     a.navbar-brand(href='/')
       //- img.d-inline-block.align-text-top(src='/bootstrap-logo.svg' alt='' width='30' height='24')
@@ -8,7 +8,14 @@ nav.navbar.navbar-expand-lg.navbar-dark.bg-dark
     #navbarColor01.collapse.navbar-collapse
       ul.navbar-nav.me-auto.mb-2.mb-lg-0
         li.nav-item
-          a.nav-link(class=(title === 'Home') ? 'active' : '', href='/') Dashboard
+          a.nav-link(class=(title === 'Home') ? 'active' : '', href='/') Home
+        li.nav-item
+          a.nav-link(class=(title === 'My Tickets') ? 'active' : '', href='/tickets') My Tickets
+        li.nav-item
+          a.nav-link(class=(title === 'Available Trains') ? 'active' : '', href='/trains') Available Trains
+        if user && user.role === 'admin'
+          li.nav-item
+            a.nav-link(class=(title === 'Dashboard') ? 'active' : '', href='/dashboard') Dashboard
         li.nav-item
           a.nav-link(class=(title === 'Contact') ? 'active' : '', href='/contact') Contact
 
