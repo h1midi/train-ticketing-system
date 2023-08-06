@@ -20,6 +20,7 @@ exports.postCreateTrain = async (req, res) => {
     for (let i = 0; i < numRoutes; i++) {
       const source = routesData[`source-${i}`];
       const departureTime = routesData[`time-${i}`];
+      const price = routesData[`price-${i}`];
       const selectedStops = Array.isArray(routesData[`selected-stops-${i}`])
         ? routesData[`selected-stops-${i}`]
         : [routesData[`selected-stops-${i}`]];
@@ -31,6 +32,7 @@ exports.postCreateTrain = async (req, res) => {
       routes.push({
         source,
         time: Date.parse(departureTime),
+        price,
         stops: selectedStops,
       });
     }
@@ -44,7 +46,7 @@ exports.postCreateTrain = async (req, res) => {
 
     await train.save();
     req.flash('success', { msg: 'Train has been created successfully.' });
-    res.redirect('/trains');
+    res.redirect('/dashboard');
   } catch (err) {
     res.status(500).json(`error: ${err}`);
   }
@@ -55,10 +57,10 @@ exports.deleteTrain = async (req, res) => {
   try {
     await Train.findByIdAndDelete(req.params.id);
     req.flash('success', { msg: 'Train has been deleted successfully.' });
-    res.redirect('/trains');
+    res.redirect('/dashboard');
   } catch (err) {
     req.flash('errors', { msg: err.message });
-    res.redirect('/');
+    res.redirect('/dashboard');
   }
 };
 
@@ -123,72 +125,129 @@ exports.searchTrains = async (req, res) => {
       title: 'Search',
     });
   } catch (err) {
-    console.log('From catch block');
-    console.log(err);
     req.flash('errors', { msg: err.message });
-    res.redirect('/');
+    res.redirect('/dashboard');
   }
 };
 
 // get all trains
-exports.getTrains = async (req, res) => {
+exports.getTrains = async (req, res, next) => {
   try {
     const trains = await Train.find()
       .populate('routes.source')
       .populate('routes.stops');
-    res.render('train/index', {
-      trains,
-      title: 'Available Trains',
-    });
-    res.status(200).json(trains);
+    res.locals.trains = trains;
+    next();
   } catch (err) {
     res.status(500).json(err.message);
   }
 };
 
+exports.renderTrainPage = async (req, res) => {
+  const trains = res.locals.trains;
+  res.render('train/index', {
+    trains,
+    title: 'Available Trains',
+  });
+};
 // get a train
-// exports.getTrain = async (req, res) => {
-//   try {
-//     const train = await Train.findById(req.params.id);
-//     res.render('train', {
-//       train,
-//       title: train.name,
-//       path: '/trains',
-//     });
-//   } catch (err) {
-//     req.flash('errors', { msg: err.message });
-//     res.redirect('/');
-//   }
-// };
+exports.getTrain = async (req, res) => {
+  try {
+    const train = await Train.findById(req.params.id)
+      .populate('routes.source')
+      .populate('routes.stops');
+    res.render('train/train', {
+      train,
+      title: train.name,
+    });
+  } catch (err) {
+    req.flash('errors', { msg: err.message });
+    res.redirect('/dashboard');
+  }
+};
 
 // update a train
-// exports.getUpdateTrain = async (req, res) => {
-//   try {
-//     const train = await Train.findById(req.params.id);
-//     res.render('update-train', {
-//       train,
-//       title: train.name,
-//       path: '/trains',
-//     });
-//   } catch (err) {
-//     req.flash('errors', { msg: err.message });
-//     res.redirect('/');
-//   }
-// };
+exports.getUpdateTrain = async (req, res) => {
+  try {
+    const train = await Train.findById(req.params.id);
+    res.render('train/edit', {
+      train,
+      title: train.name,
+    });
+  } catch (err) {
+    req.flash('errors', { msg: err.message });
+    res.redirect('/dashboard');
+  }
+};
 
-// exports.postUpdateTrain = async (req, res) => {
-//   const { name, number, seats, source, destination, stops, time } = req.body;
-//   try {
-//     const train = await Train.findById(req.params.id);
-//     train.name = name;
-//     train.number = number;
-//     train.seats = seats;
-//     train.trageds = [{ source, destination, stops, time }];
-//     await train.save();
-//     req.flash('success', { msg: 'Train has been updated successfully.' });
-//     res.redirect('/trains');
-//   } catch (err) {
-//     req.flash('errors', { msg: err.message });
-//     res.redirect('/');
-//   }
-// };
+exports.postUpdateTrain = async (req, res) => {
+  const { name, number, seats } = req.body;
+  try {
+    const train = await Train.findById(req.params.id);
+    train.name = name;
+    train.number = number;
+    train.seats = seats;
+    await train.save();
+    req.flash('success', { msg: 'Train has been updated successfully.' });
+    res.redirect('/dashboard');
+  } catch (err) {
+    req.flash('errors', { msg: err.message });
+    res.redirect('/dashboard');
+  }
+};
+
+// delete a route
+exports.deleteRoute = async (req, res) => {
+  try {
+    const train = await Train.findById(req.params.tid);
+    train.routes = train.routes.filter(
+      (route) => route._id.toString() !== req.params.rid
+    );
+    await train.save();
+    req.flash('success', { msg: 'Route has been deleted successfully.' });
+    res.redirect(`/trains/id/${req.params.tid}`);
+  } catch (err) {
+    req.flash('errors', { msg: err.message });
+    res.redirect('/dashboard');
+  }
+};
+
+// add a route
+exports.getAddRoute = async (req, res) => {
+  try {
+    const train = await Train.findById(req.params.id);
+    const stations = await Station.find();
+    res.render('train/add_route', {
+      train,
+      stations,
+      title: 'Add Route',
+    });
+  } catch (err) {
+    req.flash('errors', { msg: err.message });
+    res.redirect('/dashboard');
+  }
+};
+
+exports.postAddRoute = async (req, res) => {
+  const { source, time, price, ...routesData } = req.body;
+  try {
+    const train = await Train.findById(req.params.id);
+
+    const selectedStops = Array.isArray(routesData[`selected-stops-0`])
+      ? routesData[`selected-stops-0`]
+      : [routesData[`selected-stops-0`]];
+
+    train.routes.push({
+      source,
+      time: Date.parse(time),
+      price,
+      stops: selectedStops,
+    });
+
+    await train.save();
+    req.flash('success', { msg: 'Train has been created successfully.' });
+    res.redirect('/dashboard');
+  } catch (err) {
+    res.status(500).json(`error: ${err.message}`);
+  }
+};

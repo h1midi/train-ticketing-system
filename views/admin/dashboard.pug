@@ -1,0 +1,87 @@
+extends ../layout.pug
+
+block content
+  head
+    title Train Ticketing Dashboard
+    style.
+      /* Add your custom CSS styles here */
+      body.ad {
+        font-family: Arial, sans-serif;
+        background-color: #f7f7f7;
+        margin: 0;
+        padding: 0;
+      }
+
+      section.ad {
+        padding: 2rem;
+        margin: 2rem;
+        background-color: white;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      table.ad {
+        border-collapse: collapse;
+        width: 100%;
+      }
+
+      th.ad, td.ad {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+      }
+
+      th.ad {
+        background-color: #f2f2f2;
+      }
+
+      a {
+        text-decoration: none;
+        color: white;
+      }
+  body.ad
+    header
+      h1 Admin Dashboard
+    section.ad
+      div(style='display: flex; justify-content: space-between; align-items: center;')
+        h2 Trains
+        a(href="/trains/create")
+          .btn.btn-sm.btn-primary Add Train
+      // Display list of trains using a table.ad
+      table.ad
+        thead
+          tr.ad
+            th.ad Train ID
+            th.ad Name
+            th.ad Routes #
+            th.ad Actions
+        tbody
+          each train in trains
+            tr.ad
+              td.ad= train.number
+              td.ad= train.name
+              td.ad= train.routes.length
+              td.ad
+                a(href=`/trains/id/${train._id}`)
+                  .btn.btn-sm.btn-primary View
+    section.ad
+      div(style='display: flex; justify-content: space-between; align-items: center;')
+        h2 Stations
+        a(href="/stations/create")
+          .btn.btn-sm.btn-primary Add Station
+      table.ad
+        thead
+          tr.ad
+            th.ad Station ID
+            th.ad Name
+            th.ad Actions
+        tbody
+          each station in stations
+            tr.ad
+              td.ad= station.code
+              td.ad= station.name
+              td.ad
+                a(href=`/stations/edit/${station._id}`)
+                  .btn.btn-sm.btn-warning(style='margin-left: 10px') Edit
+                a(href=`/stations/delete/${station._id}`)
+                  .btn.btn-sm.btn-danger(style='margin-left: 10px') Delete

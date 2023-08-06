@@ -599,6 +599,15 @@ exports.postForgot = (req, res, next) => {
 exports.isAdmin = (req, res, next) => {
   if (req.user.role === 'admin') {
     next();
+  } else {
+    res.redirect('/');
   }
-  res.redirect('/');
+};
+
+exports.getDashboard = (req, res) => {
+  res.render('admin/dashboard', {
+    trains: res.locals.trains,
+    stations: res.locals.stations,
+    title: 'Dashboard',
+  });
 };

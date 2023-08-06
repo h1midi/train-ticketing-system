@@ -13,6 +13,10 @@ const ticketSchema = new mongoose.Schema({
     ref: 'Station',
     required: true,
   },
+  used: {
+    type: Boolean,
+    default: false,
+  },
   route: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Train.routes',

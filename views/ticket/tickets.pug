@@ -5,10 +5,6 @@ block content
     title= title
     style.
       body.tkt {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        flex-direction: column;
         font-family: Arial, sans-serif;
         margin: 20px;
         background-color: #f0f0f0;
@@ -22,6 +18,10 @@ block content
       ul.tkt {
         list-style-type: none;
         padding: 0;
+        justify-content: center;
+        align-items: center;
+        display: flex;
+        flex-direction: column;
       }
 
       li.tkt {
@@ -124,6 +124,7 @@ block content
             div
               p Train: #{ticket.train.name}
               p(style='background-color: #4CAF50; padding:8px; border-radius:10px') Source Station: #{ticket.source.name}
+            img(src=`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=http://localhost:8080/tickets/${ticket._id}/destroy`, alt='QR Code')
             div
               p Payment Status: #{ticket.payment_status}
               p(style='background-color: #FFD700; padding:8px; border-radius:10px') Destination Station: #{ticket.destination.name}

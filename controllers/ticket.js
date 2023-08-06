@@ -64,8 +64,31 @@ exports.getTickets = async (req, res) => {
 // cancel a ticket
 exports.cancelTicket = async (req, res) => {
   try {
+    // check if the ticket is owned by the user
+    const ticket = await Ticket.findById(req.params.id);
+    if (ticket.user.toString() !== req.user._id.toString()) {
+      req.flash('errors', { msg: 'You are not authorized to do that.' });
+      return res.redirect('/');
+    }
     await Ticket.findByIdAndDelete(req.params.id);
     console.log('Ticket has been canceled successfully.');
+    res.redirect('/tickets');
+  } catch (err) {
+    req.flash('errors', { msg: err.message });
+    res.redirect('/');
+  }
+};
+
+// destroy a ticket
+exports.destroyTicket = async (req, res) => {
+  try {
+    const ticket = await Ticket.findById(req.params.id);
+    if (ticket.used) {
+      req.flash('errors', { msg: 'This ticket already used' });
+      return res.redirect('/');
+    }
+    ticket.used = true;
+    console.log('Ticket has been destroyed successfully.');
     res.redirect('/tickets');
   } catch (err) {
     req.flash('errors', { msg: err.message });

@@ -25,10 +25,10 @@ exports.postCreateStation = async (req, res) => {
   try {
     await station.save();
     req.flash('success', { msg: 'Station has been created successfully.' });
-    res.redirect('/stations');
+    res.redirect('/dashboard');
   } catch (err) {
     req.flash('errors', { msg: err.message });
-    res.redirect('/');
+    res.redirect('/dashboard');
   }
 };
 
@@ -40,7 +40,7 @@ exports.getAllStations = async (req, res, next) => {
     next();
   } catch (err) {
     req.flash('errors', { msg: 'Failed to fetch stations' });
-    res.redirect('/');
+    res.redirect('/dashboard');
   }
 };
 // getAllStationsApi
@@ -61,43 +61,45 @@ exports.getStationById = async (req, res, next) => {
     next();
   } catch (err) {
     req.flash('errors', { msg: err.message });
-    res.redirect('/');
+    res.redirect('/dashboard');
   }
 };
 
 // updateStationById
 exports.getUpdateStationById = async (req, res) => {
-  if (req.user.role !== 'admin') {
-    return res.status(400).send({
-      message: 'You are not authorized to update a station',
-    });
-  }
   try {
     const station = await Station.findById(req.params.id);
-    res.render('stations/edit', {
+    res.render('station/edit', {
       title: 'Edit Station',
       station,
     });
   } catch (err) {
     req.flash('errors', { msg: err.message });
-    res.redirect('/');
+    res.redirect('/dashboard');
   }
 };
 exports.postUpdateStationById = async (req, res) => {
-  if (req.user.role !== 'admin') {
-    return res.status(400).send({
-      message: 'You are not authorized to update a station',
-    });
-  }
   try {
     await Station.findByIdAndUpdate(req.params.id, {
       name: req.body.name,
       code: req.body.code,
     });
     req.flash('success', { msg: 'Station has been updated successfully.' });
-    res.redirect('/');
+    res.redirect('/dashboard');
   } catch (err) {
     req.flash('errors', { msg: err.message });
-    res.redirect('/');
+    res.redirect('/dashboard');
+  }
+};
+
+// deleteStationById
+exports.deleteStationById = async (req, res) => {
+  try {
+    await Station.findByIdAndDelete(req.params.id);
+    req.flash('success', { msg: 'Station has been deleted successfully.' });
+    res.redirect('/dashboard');
+  } catch (err) {
+    req.flash('errors', { msg: err.message });
+    res.redirect('/dashboard');
   }
 };

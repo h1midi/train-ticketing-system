@@ -1,8 +1,9 @@
-extends ../layout.pug
+extends ../layout
 
 block content
   head
-    title Train Creation Form
+    title= title
+    link(rel='stylesheet', href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css')
     style.
       h1.trc {
         text-align: center;
@@ -46,6 +47,9 @@ block content
       }
 
       button.trc[type="submit"] {
+        display: block;
+        margin: 0 auto;
+        margin-top: 20px;
         background-color: #007BFF;
         color: #fff;
         padding: 10px;
@@ -57,56 +61,33 @@ block content
       button.trc[type="submit"]:hover {
         background-color: #0056b3;
       }
-  body
-    h1.trc Train Creation Form
-    form.trc(action="/trains/create", method="post")
-      label.trc(for="name") Train Name:
-      input.trc(type="text", name="name", required)
+  form(action=`/trains/${train._id}/routes/add` method='post')
+    .form-group
+      label.trc(for='source') Source
+      select#source.form-control(name='source' required)
+        each station in stations
+          option(value=`${station._id}`)= station.name
+    .form-group
+      label.trc(for='time') Time
+      input#time.form-control(type='datetime-local' name='time' required)
+    .form-group
+      label.trc(for='price') Price
+      input#price.form-control(type='number' name='price' required)
+    .form-group
+      label.trc Selected Stops:
+      select.trc(name=`selected-stops-0`, multiple )
+        each stop in []
+          option(value=stop._id) #{stop.name}
+    .form-group
+      label.trc(for=`stops-0`) Intermediate Stops:
+      select.trc(name=`stops-0`, multiple )
+        each station in []
+          option(value=station._id) #{station.name}
       br
-
-      label.trc(for="number") Train Number:
-      input.trc(type="text", name="number", required)
-      br
-
-      label.trc(for="seats") Total Seats:
-      input.trc(type="number", name="seats", required)
-      br
-
-      h3 Routes:
-      each i in [0, 1, 2]
-        div
-          h4.trc Route #{i + 1}
-          label.trc(for=`source-${i}`) Source Station:
-          select.trc(name=`source-${i}`, required )
-            each station in []
-              option(value=station._id) #{station.name}
-          br
-
-          label.trc(for=`time-${i}`) Departure Time:
-          input.trc(type="datetime-local", name=`time-${i}`, required)
-          br
-
-          label.trc(for=`price-${i}`) Price:
-          input.trc(type="number", name=`price-${i}`, required)
-          br
-
-          p.selected Stops:
-          select.trc(name=`selected-stops-${i}`, multiple )
-            each stop in []
-              option(value=stop._id) #{stop.name}
-          label.trc(for=`stops-${i}`) Intermediate Stops:
-          select.trc(name=`stops-${i}`, multiple )
-            each station in []
-              option(value=station._id) #{station.name}
-          br
-      each routeStops, routeIndex in selectedStops? selectedStops : []
-        each stopData, stopIndex in routeStops
-          input.trc(type="hidden", name=`stops-${routeIndex}-${stopIndex}`, value=stopData.stop)
-      br
-      button.trc(type="submit") Create Train
-
-    script.
-      const sourceDropdown = document.querySelectorAll('[name^="source-"]');
+      each stopData, stopIndex in selectedStops? selectedStops : []
+        input.trc(type="hidden", name=`stops-${stopIndex}`, value=stopData.stop)
+    button.trc(type='submit') Add Route
+  script.
       const stopsDropdown = document.querySelectorAll('[name^="stops-"]');
       const selectedStops = [];
       fetch('/api/stations')
@@ -118,14 +99,6 @@ block content
               const option = document.createElement('option');
               option.value = station._id;
               option.name = index;
-              option.textContent = station.name;
-              dropdown.appendChild(option);
-            });
-          });
-          sourceDropdown.forEach((dropdown) => {
-            stations.forEach((station) => {
-              const option = document.createElement('option');
-              option.value = station._id;
               option.textContent = station.name;
               dropdown.appendChild(option);
             });
@@ -142,28 +115,23 @@ block content
         const routeName = dropdownName.split('-')[0]; // 'source' or 'stops'
         const routeIndex = dropdownName.split('-')[1];
         // If the route array for the current index does not exist, create it
-        if (!selectedStops[routeIndex]) {
-          selectedStops[routeIndex] = [];
-        }
 
-        const isStopSelected = selectedStops[routeIndex].some(
+
+        const isStopSelected = selectedStops.some(
           (stopObj) => stopObj.stop === selectedStop
         );
 
-        // If the selected stop is not already selected, add it to the selectedStops array
         if (!isStopSelected) {
-          // If the current route is 'source', add the selected stop to the beginning of the route
-          // If the current route is 'stops', add the selected stop to its corresponding route
           if (routeName === 'source') {
-            selectedStops[routeIndex][0] = { stop: selectedStop, index: optionIndex };
+            selectedStops[0] = { stop: selectedStop, index: optionIndex };
           } else if (routeName === 'stops') {
-            selectedStops[routeIndex].push({ stop: selectedStop, index: optionIndex });
+            selectedStops.push({ stop: selectedStop, index: optionIndex });
           }
 
           // Display the selected stops on top of the stop select.trc
-          const stopsDropdown = document.querySelector(`[name="stops-${routeIndex}"]`);
-          const selectedStopsDropdown = document.querySelector(`[name="selected-stops-${routeIndex}"]`);
-          const selectedStopsForRoute = selectedStops[routeIndex];
+          const stopsDropdown = document.querySelector(`[name="stops-0"]`);
+          const selectedStopsDropdown = document.querySelector(`[name="selected-stops-0"]`);
+          const selectedStopsForRoute = selectedStops;
           const unSelectedOptions = Array.from(stopsDropdown.options).filter((option) =>
             !selectedStopsForRoute.some((stopObj) => stopObj.stop === option.value)
           );

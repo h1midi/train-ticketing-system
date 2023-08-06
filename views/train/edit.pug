@@ -1,0 +1,58 @@
+extends ../layout.pug
+
+block content
+  head
+    title Edit Train Info
+    style.
+      .container.t {
+        max-width: 400px;
+        margin: 0 auto;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+      }
+
+      h1.t {
+        text-align: center;
+      }
+
+      form.t {
+        display: flex;
+        flex-direction: column;
+      }
+
+      label.t {
+        margin-bottom: 5px;
+      }
+
+      input.t {
+        margin-bottom: 10px;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+      }
+
+      button.t {
+        background-color: #007BFF;
+        color: #fff;
+        padding: 10px;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+      }
+
+      button.t:hover {
+        background-color: #0056b3;
+      }
+
+  .container.t
+    h1.t Edit Train Information
+    form.t(action=`/trains/edit/${train._id}`, method="post")
+      label.t(for="name") Train Name:
+      input.t(type="text", name="name", value=train.name, required)
+      label.t(for="number") Train Number:
+      input.t(type="number", name="number", value=train.number, required)
+      label.t(for="seats") Total Seats:
+      input.t(type="number", name="seats", value=train.seats, required)
+
+      button.t(type="submit") Save Changes

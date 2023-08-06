@@ -7,6 +7,7 @@ const route = new mongoose.Schema({
     required: true,
   },
   time: { type: Date, required: true },
+  price: { type: Number, required: true },
   stops: [
     { type: mongoose.Schema.Types.ObjectId, ref: 'Station', required: true },
   ],

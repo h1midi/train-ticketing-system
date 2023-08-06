@@ -1,0 +1,136 @@
+extends ../layout.pug
+
+block content
+
+  head
+    title= title
+    link(rel='stylesheet', href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css')
+    style.
+      body.trn {
+        font-family: Arial, sans-serif;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      h1.trn {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      h2.trn {
+        margin-bottom: 10px;
+      }
+      h3.trn {
+        margin-top: 20px;
+        margin-bottom: 10px;
+      }
+      ul.trn {
+        margin: 0;
+        padding: 0;
+      }
+      li.trn {
+        list-style: none;
+        margin-bottom: 5px;
+      }
+      .stack {
+        position: relative;
+        height: 60px;
+      }
+
+      .line {
+        display: flex;
+        border: 1px solid #272829;
+        border-radius: 5px;
+        padding: 0px;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        width: 100%;
+      }
+
+      .station {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+      }
+
+      .circle {
+        background-color: #272829;
+        border-radius: 50%;
+        width: 14px;
+        height: 14px;
+        margin: 0;
+      }
+      .trains-container {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        justify-content: center;
+      }
+      input.trn[type="submit"] {
+        width: 160px;
+        height: 40px;
+        font-size: 16px;
+        margin-top: 25px;
+        padding: 0px 10px;
+        background-color: #272829;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+        margin-left: 100px;
+      }
+      input.trn[type="submit"]:hover {
+        background-color: #D8D9DA;
+        color: #272829;
+        border: 2px solid #272829;
+      }
+      .route-container {
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 10px;
+        margin-bottom: 10px;
+        box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .route-container:hover {
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+      }
+      a {
+        text-decoration: none;
+        color: #fff;
+      }
+  div(style='display: flex; justify-content: space-between; align-items: center;')
+    h2.trn= train.name
+    a(href=`/trains/edit/${train._id}`)
+      .btn.btn-md.btn-warning Edit
+  div(style='display: flex; justify-content: space-around; align-items: center;')
+    p <b>Train Number:</b> #{train.number}
+    p <b>Total Seats:</b> #{train.seats}
+  h3.trn Routes:
+  ul.trn
+    each route in train.routes
+      div.route-container
+        li.trn
+          div(style='display: flex; justify-content: space-between; align-items: center;')
+            p <b>Departure Time:</b> #{route.time.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+            a(href=`${train._id}/routes/delete/${route._id}`)
+              .btn.btn-sm.btn-danger Delete
+          div.stack
+            div.line
+            div.station
+              p= route.source.name
+              each stop in route.stops
+                p= stop.name
+            div.station(style="top: 50px;")
+              div.circle(style="background-color: #4CAF50;")
+              each stop in route.stops.slice(0, -1)
+                div.circle
+              div.circle(style="background-color: #FF2E2E;")
+          br
+  a(href=`/trains/${train._id}/routes/add`)
+    .btn.btn-md.btn-primary(style='width: 35%; display: block; margin: 0 auto; margin-top: 20px') Add Route

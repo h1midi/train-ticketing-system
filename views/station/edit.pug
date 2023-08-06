@@ -51,12 +51,12 @@ block content
   .s.container
     h1= title
 
-    form.s(action='/stations/create', method='post')
+    form.s(action=`/stations/edit/${station._id}`, method='post')
       label(for='name') Station Name:
       input.s(type='text', name='name', value= station.name, required)
 
       label(for='code') Station Code:
       input.s(type='text', name='code', value= station.code, required)
 
-      button.s(type='submit') Create
+      button.s(type='submit') Update
 

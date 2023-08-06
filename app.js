@@ -203,11 +203,13 @@ app.post(
 app.get(
   '/stations/create',
   passportConfig.isAuthenticated,
+  userController.isAdmin,
   stationController.getCreateStation
 );
 app.post(
   '/stations/create',
   passportConfig.isAuthenticated,
+  userController.isAdmin,
   stationController.postCreateStation
 );
 app.get(
@@ -220,17 +222,38 @@ app.get(
   passportConfig.isAuthenticated,
   stationController.getAllStationsApi
 );
+app.get(
+  '/stations/edit/:id',
+  passportConfig.isAuthenticated,
+  userController.isAdmin,
+  stationController.getUpdateStationById
+);
+app.post(
+  '/stations/edit/:id',
+  passportConfig.isAuthenticated,
+  userController.isAdmin,
+  stationController.postUpdateStationById
+);
+app.get(
+  '/stations/delete/:id',
+  passportConfig.isAuthenticated,
+  userController.isAdmin,
+  stationController.deleteStationById
+);
+
 /**
  * train routes.
  */
 app.get(
   '/trains/create',
   passportConfig.isAuthenticated,
+  userController.isAdmin,
   trainController.getCreateTrain
 );
 app.post(
   '/trains/create',
   passportConfig.isAuthenticated,
+  userController.isAdmin,
   trainController.postCreateTrain
 );
 app.post(
@@ -238,7 +261,54 @@ app.post(
   passportConfig.isAuthenticated,
   trainController.searchTrains
 );
-app.get('/trains', passportConfig.isAuthenticated, trainController.getTrains);
+app.get(
+  '/trains',
+  passportConfig.isAuthenticated,
+  trainController.getTrains,
+  trainController.renderTrainPage
+);
+app.get(
+  '/trains/id/:id',
+  passportConfig.isAuthenticated,
+  userController.isAdmin,
+  trainController.getTrain
+);
+app.get(
+  '/trains/edit/:id',
+  passportConfig.isAuthenticated,
+  userController.isAdmin,
+  trainController.getUpdateTrain
+);
+app.post(
+  '/trains/edit/:id',
+  passportConfig.isAuthenticated,
+  userController.isAdmin,
+  trainController.postUpdateTrain
+);
+app.get(
+  '/trains/delete/:id',
+  passportConfig.isAuthenticated,
+  userController.isAdmin,
+  trainController.deleteTrain
+);
+app.get(
+  '/trains/id/:tid/routes/delete/:rid',
+  passportConfig.isAuthenticated,
+  userController.isAdmin,
+  trainController.deleteRoute
+);
+app.get(
+  '/trains/:id/routes/add',
+  passportConfig.isAuthenticated,
+  userController.isAdmin,
+  trainController.getAddRoute
+);
+app.post(
+  '/trains/:id/routes/add',
+  passportConfig.isAuthenticated,
+  userController.isAdmin,
+  trainController.postAddRoute
+);
 /**
  * ticket routes.
  */
@@ -256,6 +326,22 @@ app.post(
   '/cancel/:id',
   passportConfig.isAuthenticated,
   ticketController.cancelTicket
+);
+app.post(
+  'tickets/:id/destroy',
+  passportConfig.isAuthenticated,
+  ticketController.destroyTicket
+);
+/**
+ * admin routes.
+ */
+app.get(
+  '/dashboard',
+  passportConfig.isAuthenticated,
+  userController.isAdmin,
+  trainController.getTrains,
+  stationController.getAllStations,
+  userController.getDashboard
 );
 /**
  * Error Handler.
